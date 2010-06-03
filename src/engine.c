@@ -47,7 +47,6 @@ static int allot_direction(ghost_t *ghost) {
 }
 
 static int get_direction_towards(ghost_t *ghost, int n, int m) {
-	int directions[4] = {ghost->direction, ghost->direction, ghost->direction, ghost->direction};	
 	int x = ghost->position.x / IMAGE_WIDTH;
 	int y = ghost->position.y / IMAGE_HEIGHT;
 	if (ghost->position.x < m * IMAGE_WIDTH && map[y][x+1] != WALL && ghost->direction != LEFT) {
@@ -99,8 +98,7 @@ void move_ghost(ghost_t *ghost, int ghost_name, pacman_t *pacman) {
 			}
 		}
 		/*Move within chosen direction*/
-		switch (ghost->direction)
-		{
+		switch (ghost->direction) {
 			case RIGHT:
 				x++;
 				break;

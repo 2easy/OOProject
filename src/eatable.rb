@@ -4,7 +4,7 @@ module ToEat
     Eatable_things = [:dot, :power_pill, :bonus]
     class Eatable
         def initialize
-            @my_pic = Video::load_bmp("../images/eatable.bmp")
+            @my_pic = Video::load_no_transparent("../images/eatable.bmp")
             # TODO
             name = :dot
             case name

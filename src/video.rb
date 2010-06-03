@@ -17,9 +17,13 @@ module Video
         SDL.quit
     end 
     # TODO
+    def Video::load_no_transparent image
+        graph = SDL::Surface.load(image)
+        graph.display_format
+    end
     def Video::load_bmp image
         graph = SDL::Surface.load(image)
-        #graph = graph.set_color_key(SDL::SRCCOLORKEY,graph[0,0])
-        graph = graph.display_format
+        graph.set_color_key(SDL::RLEACCEL | SDL::SRCCOLORKEY,0)
+        graph.display_format
     end
 end

@@ -24,7 +24,8 @@ class Maze
                     @to_redraw << [x,y] if(Maze_tiles[symbol] == :dot or 
                                          Maze_tiles[symbol] == :empty or
                                          Maze_tiles[symbol] == :power_pill or
-                                         Maze_tiles[symbol] == :bonus)
+                                         Maze_tiles[symbol] == :bonus or
+                                         Maze_tiles[symbol] == :cage)
                     x += 1
                 end
             end
@@ -38,8 +39,11 @@ class Maze
     def []=(x,y,n)
         @maze[y][x] = n
     end
-    def wall_or_cage? x,y 
-        self[x,y] == :wall or self[x,y] == :cage 
+    def cage? x,y 
+        self[x,y] == :cage 
+    end
+    def wall? x,y 
+        self[x,y] == :wall
     end
     def dot? x,y
         self[x,y] == :dot
