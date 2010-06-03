@@ -55,7 +55,7 @@ class Maze
         begin
             SDL::Screen.blit(
                     @maze_pic, 0, 0,
-                    30*Video::Image_width, 31*Video::Image_height,
+                    34*Video::Image_width, 31*Video::Image_height,
                     Video::Game_screen,@sprite_coords[:x],@sprite_coords[:y])
         rescue Exception => a
             puts "Blit error: #{a}"

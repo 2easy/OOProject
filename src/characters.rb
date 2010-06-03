@@ -148,6 +148,12 @@ module Character
             super name
             @speed = Ghost_speed
         end
+        def move
+        end
+        def allot_direction 
+            directions = [4]
+            directions.fill
+        end
         def draw
             begin
                 pict_x = self.animate
