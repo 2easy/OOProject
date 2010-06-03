@@ -26,14 +26,15 @@ module ToEat
             Eatable_things.each { |eatable| return true if eatable == thing } 
             return false
         end
-        def draw to_redraw,maze
-            for unit in to_redraw
+        def draw coords,maze
+            for unit in coords
                 x,y = unit
                 case maze[x,y]
                     when :empty      then pict_x = 0
-                    when :dot        then pict_x = 25
+                    when :dot        then pict_x = 25 
                     when :power_pill then pict_x = 50
                     when :bonus      then pict_x = 75
+                    else next
                 end
                 SDL::Screen.blit(
                     @my_pic, pict_x, 0,

@@ -11,7 +11,6 @@ class Game
     def initialize mode
         @event = SDL::Event.new
         @level = 1
-        @eatable = ToEat::Eatable.new
         @key = Key.new
         case mode
             when :single_player
@@ -21,15 +20,17 @@ class Game
                     @ghosts[name] = Character::Ghost.new(name)
                 end
                 @maze = Maze.new
+                @eatable = ToEat::Eatable.new
         end
     end
     def run
         direction = :left
         @maze.draw
         while @pacman.alive?
-            #sleep 0.001
+            #sleep 1
             #@pacman.speed -= 1 if @pacman.eating?
-            @eatable.draw(@maze.to_redraw,@maze)
+            @maze.redraw
+            @eatable.draw(@maze.eatable,@maze)
             @pacman.draw 
             for ghost_name in Character::Ghosts
                 @ghosts[ghost_name].draw

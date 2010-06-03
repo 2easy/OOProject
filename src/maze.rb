@@ -1,19 +1,21 @@
 require 'sdl'
 
 class Maze
-    attr_reader :to_redraw
+    attr_reader :eatable
     Maze_width  = 30
     Maze_height = 31
     Maze_pic_width = 775
     Maze_pic_height = 850
     Maze_tiles  = { '#' => :wall,     ' ' => :empty,
                     '.' => :dot,      'P' => :power_pill,
-                    'T' => :teleport, 'C' => :cage     }
+                    'T' => :teleport, 
+                    'C' => :cage,     'G' => :gate }
     def initialize
         @maze = []
-        @to_redraw = []
+        @ground = []
+        @eatable = []
         Maze_height.times do |y|
-            @maze[y] = Array.new Maze_width
+            @maze[y] = Array.new(Maze_width)
         end 
         File.open("maze.txt","r") do |file|
             for y in 0...Maze_height do
@@ -21,16 +23,18 @@ class Maze
                 x = 0
                 for symbol in line
                     self[x,y] = Maze_tiles[symbol]
-                    @to_redraw << [x,y] if(Maze_tiles[symbol] == :dot or 
-                                         Maze_tiles[symbol] == :empty or
+                    @ground << [x,y] if( Maze_tiles[symbol] == :gate  or
+                                         Maze_tiles[symbol] == :cage )
+                    @eatable << [x,y] if(Maze_tiles[symbol] == :empty or
+                                         Maze_tiles[symbol] == :dot or
                                          Maze_tiles[symbol] == :power_pill or
-                                         Maze_tiles[symbol] == :bonus or
-                                         Maze_tiles[symbol] == :cage)
+                                         Maze_tiles[symbol] == :bonus )
                     x += 1
                 end
             end
         end
         @maze_pic = SDL::Surface.load("../images/maze.bmp")
+        @ground_pic = Video::load_no_transparent("../images/ground.bmp")
         @sprite_coords = { :x => 25, :y => 0 }
     end
     def [](x,y)
@@ -54,7 +58,21 @@ class Maze
     def teleport? x,y
         self[x,y] == :teleport
     end
-    #SDL::Surface.blit(src,srcX,srcY,srcW,srcH,dst,dstX,dstY)
+    def redraw
+        for unit in @ground
+            x,y = unit
+            case self[x,y]
+                when :cage  then pict_x = 0
+                when :gate  then pict_x = 25
+                else next
+            end
+            SDL::Screen.blit(
+                @ground_pic, pict_x, 0,
+                Video::Image_width, Video::Image_height,
+                Video::Game_screen,
+                x*Video::Image_width, y*Video::Image_height)
+        end
+    end 
     def draw
         begin
             SDL::Screen.blit(
