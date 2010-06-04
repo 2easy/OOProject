@@ -9,26 +9,6 @@ module Character
                 :right => Video::load_bmp("../images/#{name.to_s}_right.bmp"),
                 :up    => Video::load_bmp("../images/#{name.to_s}_up.bmp"   ),
                 :down  => Video::load_bmp("../images/#{name.to_s}_down.bmp" )}
-            case name
-                when :pacman
-                    start_x = 15; start_y = 23
-                    @direction = :left
-                when :blinky
-                    start_x = 15; start_y = 11
-                    @direction = :left
-                when :inky
-                    start_x = 14; start_y = 14
-                    @direction = :up
-                when :pinky
-                    start_x = 15; start_y = 14
-                    @direction = :up
-                when :clyde
-                    start_x = 16; start_y = 14
-                    @direction = :up
-            end
-            @sprite_coords = { :x => start_x*Video::Image_width,
-                               :y => start_y*Video::Image_height }
-            @anim_state = -1 
         end
         def x; @sprite_coords[:x]/Video::Image_width; end
         def y; @sprite_coords[:y]/Video::Image_height; end
@@ -68,16 +48,24 @@ module Character
     end
     
     class PacMan < Creature
-        attr_accessor :speed, :state
+        attr_accessor :speed, :state, :lifes
         Pacman_speed           = 3
         Pacman_animation_speed = 3
         def initialize name
             super name
-            @speed = Pacman_speed
             @lifes = 2
-            @state  = :normal
+            self.set_defaults
         end
 
+        def set_defaults
+            start_x = 15; start_y = 23
+            @direction  = :left
+            @state      = :normal
+            @speed      = Pacman_speed
+            @anim_state = Video::Init_animation
+            @sprite_coords = { :x => start_x*Video::Image_width,
+                               :y => start_y*Video::Image_height }
+        end
         def alive?;      @lifes >= 0;           end
         def eating?;     @state == :eating;     end
         def powered_up?; @state == :powered_up; end
@@ -152,8 +140,28 @@ module Character
                 :right => Video::load_bmp("../images/eyes_right.bmp"),
                 :up    => Video::load_bmp("../images/eyes_up.bmp"   ),
                 :down  => Video::load_bmp("../images/eyes_down.bmp" )}
-            @speed = Ghost_speed
-            @state = :flashing #:alive
+            self.set_defaults
+        end
+        def set_defaults
+             case @name
+                when :blinky
+                    start_x = 15; start_y = 11
+                    @direction = :left
+                when :inky
+                    start_x = 14; start_y = 14
+                    @direction = :up
+                when :pinky
+                    start_x = 15; start_y = 14
+                    @direction = :up
+                when :clyde
+                    start_x = 16; start_y = 14
+                    @direction = :up
+            end
+            @state      = :alive
+            @speed      = Ghost_speed
+            @anim_state = Video::Init_animation
+            @sprite_coords = { :x => start_x*Video::Image_width,
+                               :y => start_y*Video::Image_height }
         end
         def move maze,pacman
         @speed.times do
@@ -253,7 +261,7 @@ module Character
         end
         def act_on_collision
             if @state == :alive
-                return  
+                Game::pacman_caught
             elsif(@state == :weak or
                   @state == :flashing)
                 @state = :dead

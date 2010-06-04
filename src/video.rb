@@ -6,6 +6,7 @@ module Video
     Bits_per_pixel = 32
     Image_width    = 25
     Image_height   = 25
+    Init_animation = -1
 
     begin
         SDL.init(SDL::INIT_AUDIO | SDL::INIT_VIDEO)
