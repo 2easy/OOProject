@@ -15,9 +15,9 @@ class Game
         case mode
             when :single_player
                 @pacman = Character::PacMan.new(:pacman)
-                @ghosts = {}
+                @ghosts = []
                 for name in Character::Ghosts
-                    @ghosts[name] = Character::Ghost.new(name)
+                    @ghosts << Character::Ghost.new(name)
                 end
                 @maze = Maze.new
                 @eatable = ToEat::Eatable.new
@@ -27,19 +27,23 @@ class Game
         direction = :left
         @maze.draw
         while @pacman.alive?
-            #sleep 1
+#            sleep 1
             #@pacman.speed -= 1 if @pacman.eating?
             @maze.redraw
             @eatable.draw(@maze.eatable,@maze)
             @pacman.draw 
-            for ghost_name in Character::Ghosts
-                @ghosts[ghost_name].draw
+            for name in @ghosts
+                name.draw
             end
             Video::Game_screen.flip
 
             @pacman.move(direction,@maze)
-            for ghost_name in Character::Ghosts
-                @ghosts[ghost_name].move(@maze,@pacman)
+            for name in @ghosts
+                name.move(@maze,@pacman)
+            end
+
+            for name in @ghosts
+                name.act_on_collision if name.caught?([@pacman])
             end
             if @event.poll != 0 then
                 if @event.type == SDL::Event::QUIT then
@@ -60,7 +64,6 @@ class Game
             elsif @key.up    then direction = :up
             elsif @key.down  then direction = :down
             else direction = :none end
-
         end
         SDL.quit
     end

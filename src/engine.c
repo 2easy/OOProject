@@ -24,16 +24,6 @@ void bring_ghosts_morale_back(ghost_t *ghosts) {
 		}
 	}
 }
-int ghosts_collision(pacman_t *pacman, ghost_t *ghosts) {
-	int i;
-	/*Check for collision*/
-	for (i=0;i<4;i++) {
-		if (abs(ghosts[i].position.x-pacman->position.x) < TOLERANCE && abs(ghosts[i].position.y-pacman->position.y) < TOLERANCE) {
-			return i;
-		}
-	}
-	return NOT_CAUGHT;
-}
 
 int pills_left(void) {
 	int i, j, pills = 0;

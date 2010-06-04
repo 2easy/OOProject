@@ -30,12 +30,11 @@ module Character
                                :y => start_y*Video::Image_height }
             @anim_state = -1 
         end
-        def x
-            @sprite_coords[:x] / Video::Image_width
-        end
-        def y
-            @sprite_coords[:y] / Video::Image_height
-        end
+        def x; @sprite_coords[:x]/Video::Image_width; end
+        def y; @sprite_coords[:y]/Video::Image_height; end
+        def sprite_x; @sprite_coords[:x]; end
+        def sprite_y; @sprite_coords[:y]; end
+
         def new_coords direction
             case direction
                 when :left  then x1 = self.x - 1; y1 = self.y
@@ -161,11 +160,8 @@ module Character
             if self.fits_the_grid?
                 # Get direction
                 if self.alive?
-                    if @name == :blinky
-                        self.get_direction_towards(maze,pacman.x,pacman.y)
-                    else 
-                        self.allot_direction(maze) 
-                    end
+                # TODO change name
+                    self.get_direction_towards(maze,pacman.x,pacman.y)
                 elsif self.weak? or self.flashing?
                 # TODO
                     self.allot_direction(maze)
@@ -188,36 +184,7 @@ module Character
             self.move_sprite
         end
         end
-
-        def alive?;     @state == :alive;    end
-        def dead?;      @state == :dead;     end
-        def weak?;      @state == :weak;     end
-        def flashing?;  @state == :flashing; end
-        def in_cage? maze
-            maze[self.x,self.y] == :cage
-        end
         def get_direction_towards maze,x1,y1
-            if (self.x < x1 and 
-                maze[x+1,y] != :wall and 
-                !self.opposite_direction?(:right))
-                @direction = :right
-            elsif(self.x > x1 and
-                  maze[x-1,y] != :wall and
-                  !self.opposite_direction?(:left))
-                @direction = :left
-            elsif(self.y < y1 and
-                  maze[x,y+1] != :wall and
-                  !self.opposite_direction?(:down))
-                @direction = :down
-            elsif(self.y > y1 and
-                  maze[x,y-1] != :wall and
-                  !self.opposite_direction?(:up))
-                @direction = :up
-            else
-                self.allot_direction maze
-            end
-        end
-        def allot_direction maze
             if self.in_cage?(maze)
                 if maze[x,y-1] != :wall
                     @direction = :up
@@ -230,6 +197,31 @@ module Character
                     return
                 end
             end
+            if @name == :blinky
+                if (self.x < x1 and 
+                    maze[x+1,y] != :wall and 
+                    !self.opposite_direction?(:right))
+                    @direction = :right
+                elsif(self.x > x1 and
+                    maze[x-1,y] != :wall and
+                    !self.opposite_direction?(:left))
+                    @direction = :left
+                elsif(self.y < y1 and
+                    maze[x,y+1] != :wall and
+                    !self.opposite_direction?(:down))
+                    @direction = :down
+                elsif(self.y > y1 and
+                    maze[x,y-1] != :wall and
+                    !self.opposite_direction?(:up))
+                    @direction = :up
+                else
+                    self.allot_direction maze
+                end
+            else
+                self.allot_direction maze
+            end
+        end
+        def allot_direction maze
             directions = Array.new(4)
             directions.fill(@direction)
             i = -1
@@ -242,6 +234,32 @@ module Character
             directions[i+=1] = :down  if(maze[self.x,self.y+1] != :wall and
                                          @direction  != :up)
             @direction = directions[rand(i+=1)]
+        end
+
+        def alive?;     @state == :alive;    end
+        def dead?;      @state == :dead;     end
+        def weak?;      @state == :weak;     end
+        def flashing?;  @state == :flashing; end
+        def in_cage? maze
+            maze[self.x,self.y] == :cage
+        end
+
+        def caught? players
+            for character in players
+                return true if ((self.sprite_x - character.sprite_x).abs < 15 and
+                                (self.sprite_y - character.sprite_y).abs < 15)
+            end
+            return false
+        end
+        def act_on_collision
+            if @state == :alive
+                return  
+            elsif(@state == :weak or
+                  @state == :flashing)
+                @state = :dead
+            else
+                return
+            end
         end
         def draw
             begin
@@ -269,10 +287,10 @@ module Character
                 pict = 3
             end
             case @state
-                when :alive     then return pict 
+                when :alive     then return pict % 2 
                 when :flashing  then return pict
                 when :weak      then return pict % 2 
-                when :dead      then return 0 
+                else return 0 
             end
         end
     end
