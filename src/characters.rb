@@ -143,8 +143,14 @@ module Character
         Ghost_animation_speed = 10
         def initialize name
             super name
+            #@weak_pic = Video::load_bmp("../images/.bmp" ),
+            @dead_pic = {
+                :left  => Video::load_bmp("../images/eyes_left.bmp" ),
+                :right => Video::load_bmp("../images/eyes_right.bmp"),
+                :up    => Video::load_bmp("../images/eyes_up.bmp"   ),
+                :down  => Video::load_bmp("../images/eyes_down.bmp" )}
             @speed = Ghost_speed
-            @state = :alive
+            @state = :dead #:alive
         end
         def move maze,pacman
         @speed.times do
@@ -170,6 +176,7 @@ module Character
                     else
                         @sprite_coords[:x] = Video::Image_width * 28
                     end
+                    return
                 elsif maze.wall?(x1,y1)
                     return
                 end
@@ -230,14 +237,18 @@ module Character
                                          @direction  != :down)
             directions[i+=1] = :down  if(maze[self.x,self.y+1] != :wall and
                                          @direction  != :up)
-            #puts "#{@name}: #{directions[rand(i+=1)]}"
             @direction = directions[rand(i+=1)]
         end
         def draw
             begin
-                pict_x = self.animate
+                case @state
+                    when :alive then state_pic = @my_pic
+                                     pict_x = self.animate
+                    when :dead  then state_pic = @dead_pic
+                                     pict_x = 0
+                end
                 SDL::Screen.blit(
-                    @my_pic[@direction],
+                    state_pic[@direction],
                     pict_x*Video::Image_width, 0,
                     Video::Image_width,Video::Image_height,
                     Video::Game_screen,@sprite_coords[:x],@sprite_coords[:y])
