@@ -17,12 +17,10 @@ class Game
             when :single_player
                 @pacman = Character::PacMan.new(:pacman)
                 @players << @pacman
-                @@players = @players
                 @ghosts = []
                 for name in Character::Ghosts
                     @ghosts << Character::Ghost.new(name)
                 end
-                @@ghosts = @ghosts
                 @maze = Maze.new
                 @eatable = ToEat::Eatable.new
         end
@@ -30,21 +28,51 @@ class Game
     def draw
         @maze.redraw
         @eatable.draw(@maze.eatable,@maze)
-        @pacman.draw 
         for name in @ghosts
             name.draw
         end
+        @pacman.draw 
         Video::Game_screen.flip
     end
-    def Game::pacman_caught
-        for name in @@players
+    def judge
+        for ghost in @ghosts
+            for player in @players
+                if self.collide?(ghost,player)
+                    case ghost.state
+                        when (:weak or :flashing) then
+                            ghost.state = :dead
+                        when :alive then
+                            self.new_round 
+                        else next
+                    end
+                end
+            end
+        end 
+    end
+    def collide? ghost,player
+        return true if ((ghost.sprite_x - player.sprite_x).abs < 15 and
+                        (ghost.sprite_y - player.sprite_y).abs < 15)
+        return false
+    end
+    def new_round
+        for name in @players
+            name.state = :dead
+            self.death_animation
             name.set_defaults
             name.lifes -= 1
         end
-        for name in @@ghosts
+        for name in @ghosts
             name.set_defaults
         end
+        sleep 1
     end
+    def death_animation
+        for i in 0...25
+            self.draw 
+            sleep 0.05
+        end
+    end
+
     def run
         direction = :left
         @maze.draw
@@ -57,10 +85,8 @@ class Game
             for name in @ghosts
                 name.move(@maze,@pacman)
             end
+            self.judge
 
-            for name in @ghosts
-                name.act_on_collision if name.caught?(@players)
-            end
             if @event.poll != 0 then
                 if @event.type == SDL::Event::QUIT then
                     break

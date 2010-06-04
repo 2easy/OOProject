@@ -119,13 +119,18 @@ module Character
         def animate
             @anim_state += 1
             pict = @anim_state / Pacman_animation_speed
-            @anim_state = 0 if pict == 7
-            pict = 8 - pict if pict > 4
-            pict
+            if @state == :dead
+                return pict      
+            else
+                @anim_state = 0 if pict == 7
+                pict = 8 - pict if pict > 4
+                return pict
+            end    
         end
-    end
+            end
 
     class Ghost < Creature
+        attr_accessor :state
         Ghost_speed           = 3
         Ghost_animation_speed = 10
         def initialize name
@@ -252,23 +257,6 @@ module Character
             maze[self.x,self.y] == :cage
         end
 
-        def caught? players
-            for character in players
-                return true if ((self.sprite_x - character.sprite_x).abs < 15 and
-                                (self.sprite_y - character.sprite_y).abs < 15)
-            end
-            return false
-        end
-        def act_on_collision
-            if @state == :alive
-                Game::pacman_caught
-            elsif(@state == :weak or
-                  @state == :flashing)
-                @state = :dead
-            else
-                return
-            end
-        end
         def draw
             begin
                 case @state
