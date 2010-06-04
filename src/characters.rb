@@ -28,7 +28,7 @@ module Character
             end
             @sprite_coords = { :x => start_x*Video::Image_width,
                                :y => start_y*Video::Image_height }
-            @anim_state = 0
+            @anim_state = -1 
         end
         def x
             @sprite_coords[:x] / Video::Image_width
@@ -130,8 +130,8 @@ module Character
             end
         end
         def animate
-            pict = @anim_state / Pacman_animation_speed
             @anim_state += 1
+            pict = @anim_state / Pacman_animation_speed
             @anim_state = 0 if pict == 7
             pict = 8 - pict if pict > 4
             pict
@@ -143,14 +143,18 @@ module Character
         Ghost_animation_speed = 10
         def initialize name
             super name
-            #@weak_pic = Video::load_bmp("../images/.bmp" ),
+            @weak_pic = {
+                :left  => Video::load_bmp("../images/weak.bmp"),
+                :right => Video::load_bmp("../images/weak.bmp"),
+                :up    => Video::load_bmp("../images/weak.bmp"),
+                :down  => Video::load_bmp("../images/weak.bmp")}
             @dead_pic = {
                 :left  => Video::load_bmp("../images/eyes_left.bmp" ),
                 :right => Video::load_bmp("../images/eyes_right.bmp"),
                 :up    => Video::load_bmp("../images/eyes_up.bmp"   ),
                 :down  => Video::load_bmp("../images/eyes_down.bmp" )}
             @speed = Ghost_speed
-            @state = :dead #:alive
+            @state = :flashing #:alive
         end
         def move maze,pacman
         @speed.times do
@@ -243,10 +247,10 @@ module Character
             begin
                 case @state
                     when :alive then state_pic = @my_pic
-                                     pict_x = self.animate
                     when :dead  then state_pic = @dead_pic
-                                     pict_x = 0
+                    else state_pic = @weak_pic
                 end
+                pict_x = self.animate
                 SDL::Screen.blit(
                     state_pic[@direction],
                     pict_x*Video::Image_width, 0,
@@ -258,13 +262,18 @@ module Character
             end
         end
         def animate
-            pict = @anim_state / Ghost_animation_speed
             @anim_state += 1
-            if pict == 2
-                @anim_state = 0 
-                pict -= 1
+            pict = @anim_state / Ghost_animation_speed
+            if pict == 4
+                @anim_state = 0
+                pict = 3
             end
-            pict
+            case @state
+                when :alive     then return pict 
+                when :flashing  then return pict
+                when :weak      then return pict % 2 
+                when :dead      then return 0 
+            end
         end
     end
 end
