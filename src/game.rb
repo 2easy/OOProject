@@ -39,7 +39,7 @@ class Game
 
             @pacman.move(direction,@maze)
             for ghost_name in Character::Ghosts
-                @ghosts[ghost_name].move(@maze)
+                @ghosts[ghost_name].move(@maze,@pacman)
             end
             if @event.poll != 0 then
                 if @event.type == SDL::Event::QUIT then

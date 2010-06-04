@@ -61,6 +61,14 @@ module Character
                 when :down  then @sprite_coords[:y] += 1
             end
         end
+        Opposite_directions = [[:up,:down],[:left,:right]]
+        def opposite_direction? direction
+            for opp in Opposite_directions
+                return true if ([@direction,direction] == opp or
+                                [direction,@direction] == opp)
+            end
+            return false
+        end
     end
     
     class PacMan < Creature
@@ -78,14 +86,6 @@ module Character
         def eating?;     @state == :eating;     end
         def powered_up?; @state == :powered_up; end
 
-        Opposite_directions = [[:up,:down],[:left,:right]]
-        def opposite_direction? direction
-            for opp in Opposite_directions
-                return true if ([@direction,direction] == opp or
-                                [direction,@direction] == opp)
-            end
-            return false
-        end
         def move direction,maze
         self.speed.times do
             # Turning backwards
@@ -149,18 +149,21 @@ module Character
             @speed = Ghost_speed
             @state = :alive
         end
-        def move maze
+        def move maze,pacman
         @speed.times do
             if self.fits_the_grid?
                 # Get direction
                 if self.alive?
-                    self.allot_direction(maze) 
+                    if @name == :blinky
+                        self.get_direction_towards(maze,pacman.x,pacman.y)
+                    else 
+                        self.allot_direction(maze) 
+                    end
                 elsif self.weak? or self.flashing?
+                # TODO
                     self.allot_direction(maze)
                 elsif self.dead?
-                    self.allot_direction(maze)
-                else
-                    self.allot_direction(maze)
+                    self.get_direction_towards(maze,14,14)
                 end
                 # Move within chosen direction
                 x1,y1 = self.new_coords(@direction)
@@ -185,8 +188,40 @@ module Character
         def in_cage? maze
             maze[self.x,self.y] == :cage
         end
-
+        def get_direction_towards maze,x1,y1
+            if (self.x < x1 and 
+                maze[x+1,y] != :wall and 
+                !self.opposite_direction?(:right))
+                @direction = :right
+            elsif(self.x > x1 and
+                  maze[x-1,y] != :wall and
+                  !self.opposite_direction?(:left))
+                @direction = :left
+            elsif(self.y < y1 and
+                  maze[x,y+1] != :wall and
+                  !self.opposite_direction?(:down))
+                @direction = :down
+            elsif(self.y > y1 and
+                  maze[x,y-1] != :wall and
+                  !self.opposite_direction?(:up))
+                @direction = :up
+            else
+                self.allot_direction maze
+            end
+        end
         def allot_direction maze
+            if self.in_cage?(maze)
+                if maze[x,y-1] != :wall
+                    @direction = :up
+                    return
+                elsif maze[x-1,y] != :wall
+                    @direction = :left
+                    return
+                else
+                    @direction = :right
+                    return
+                end
+            end
             directions = Array.new(4)
             directions.fill(@direction)
             i = -1
