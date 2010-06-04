@@ -11,26 +11,23 @@ module Character
                 :down  => Video::load_bmp("../images/#{name.to_s}_down.bmp" )}
             case name
                 when :pacman
-                    @sprite_coords = { :x => 15*Video::Image_width,
-                                       :y => 23*Video::Image_height }
+                    start_x = 15; start_y = 23
                     @direction = :left
                 when :blinky
-                    @sprite_coords = { :x => 15*Video::Image_width,
-                                       :y => 11*Video::Image_height }
+                    start_x = 15; start_y = 11
                     @direction = :left
                 when :inky
-                    @sprite_coords = { :x => 14*Video::Image_width,
-                                       :y => 14*Video::Image_height }
+                    start_x = 14; start_y = 14
                     @direction = :up
                 when :pinky
-                    @sprite_coords = { :x => 15*Video::Image_width,
-                                       :y => 14*Video::Image_height }
+                    start_x = 15; start_y = 14
                     @direction = :up
                 when :clyde
-                    @sprite_coords = { :x => 16*Video::Image_width,
-                                       :y => 14*Video::Image_height }
+                    start_x = 16; start_y = 14
                     @direction = :up
             end
+            @sprite_coords = { :x => start_x*Video::Image_width,
+                               :y => start_y*Video::Image_height }
             @anim_state = 0
         end
         def x
