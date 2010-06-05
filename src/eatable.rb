@@ -22,10 +22,6 @@ module ToEat
         def bonus?
             @name == :bonus
         end
-        def eatable? thing
-            Eatable_things.each { |eatable| return true if eatable == thing } 
-            return false
-        end
         def draw coords,maze
             for unit in coords
                 x,y = unit

@@ -12,11 +12,33 @@ class Maze
                     'C' => :cage,     'G' => :gate }
     def initialize
         @maze = []
-        @ground = []
-        @eatable = []
         Maze_height.times do |y|
             @maze[y] = Array.new(Maze_width)
         end 
+        self.set_defaults
+        @maze_pic = SDL::Surface.load("../images/maze.bmp")
+        @ground_pic = Video::load_no_transparent("../images/ground.bmp")
+        @sprite_coords = { :x => 25, :y => 0 }
+    end
+
+    def [](x,y);         @maze[y][x];              end
+    def []=(x,y,n);      @maze[y][x] = n;          end
+    def cage? x,y;       self[x,y] == :cage;       end
+    def wall? x,y;       self[x,y] == :wall;       end
+    def dot? x,y;        self[x,y] == :dot;        end
+    def power_pill? x,y; self[x,y] == :power_pill; end
+    def teleport? x,y;   self[x,y] == :teleport;   end
+    def all_dots_eaten?; @dots_quantity <= 0;      end
+
+    def remove_dot x,y
+        self[x,y] = :empty
+        @dots_quantity -= 1
+    end
+    
+    def set_defaults
+        @dots_quantity = 0
+        @ground = []
+        @eatable = []
         File.open("maze.txt","r") do |file|
             for y in 0...Maze_height do
                 line = file.readline.chomp!.split ""
@@ -29,35 +51,13 @@ class Maze
                                          Maze_tiles[symbol] == :dot or
                                          Maze_tiles[symbol] == :power_pill or
                                          Maze_tiles[symbol] == :bonus )
+                    @dots_quantity += 1 if Maze_tiles[symbol] == :dot  
                     x += 1
                 end
             end
         end
-        @maze_pic = SDL::Surface.load("../images/maze.bmp")
-        @ground_pic = Video::load_no_transparent("../images/ground.bmp")
-        @sprite_coords = { :x => 25, :y => 0 }
     end
-    def [](x,y)
-        @maze[y][x]
-    end
-    def []=(x,y,n)
-        @maze[y][x] = n
-    end
-    def cage? x,y 
-        self[x,y] == :cage 
-    end
-    def wall? x,y 
-        self[x,y] == :wall
-    end
-    def dot? x,y
-        self[x,y] == :dot
-    end
-    def power_pill? x,y
-        self[x,y] == :power_pill
-    end
-    def teleport? x,y
-        self[x,y] == :teleport
-    end
+
     def redraw
         for unit in @ground
             x,y = unit

@@ -56,6 +56,8 @@ module Character
             super name
             @lifes = 2
             @power_time = 0
+            @killmode = SDL::Mixer::Wave.load("../sounds/killmode.wav")
+            @chomp_a_dot = SDL::Mixer::Wave.load("../sounds/chompadot.wav")
             self.set_defaults
         end
 
@@ -64,7 +66,7 @@ module Character
             @direction  = :left
             @state      = :normal
             @speed      = Pacman_speed
-            @anim_state = Video::Init_animation
+            @anim_state = Video::Init_animation 
             @sprite_coords = { :x => start_x*Video::Image_width,
                                :y => start_y*Video::Image_height }
         end
@@ -90,11 +92,15 @@ module Character
                 # Maze interaction
                 if maze.dot?(self.x,self.y)
                     # TODO Score += 10
-                    maze[self.x,self.y] = :empty
+                    maze.remove_dot(self.x,self.y)
+                    SDL::Mixer.play_channel(Sound::Pacman_channel,
+                                            @chomp_a_dot,0)
                     #@state = :eating
                 elsif maze.power_pill?(self.x,self.y)
                     maze[self.x,self.y] = :empty
                     ghosts.each { |ghost| ghost.weaken }
+                    SDL::Mixer.play_channel(Sound::Background_channel,
+                                            @killmode,3)
                     @powered_at = SDL::get_ticks
                 end
                 x1,y1 = self.new_coords(@direction)
@@ -226,7 +232,7 @@ module Character
         end
         end
         def get_direction_to maze,x1,y1
-            if(self.alive? and self.in_cage?(maze))
+            if(not(self.dead?) and self.in_cage?(maze))
                 self.get_direction_out_of_cage(maze)
                 return
             end
@@ -259,12 +265,16 @@ module Character
             directions.fill(@direction)
             i = -1
             directions[i+=1] = :right if(maze[self.x+1,self.y] != :wall and 
+                                         maze[self.x+1,self.y] != :gate and
                                          @direction  != :left)
             directions[i+=1] = :left  if(maze[self.x-1,self.y] != :wall and
+                                         maze[self.x-1,self.y] != :gate and
                                          @direction  != :right)
             directions[i+=1] = :up    if(maze[self.x,self.y-1] != :wall and
+                                         maze[self.x,self.y-1] != :gate and
                                          @direction  != :down)
             directions[i+=1] = :down  if(maze[self.x,self.y+1] != :wall and
+                                         maze[self.x,self.y+1] != :gate and
                                          @direction  != :up)
             @direction = directions[rand(i+=1)]
         end

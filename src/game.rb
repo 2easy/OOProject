@@ -3,7 +3,7 @@
 require 'sdl'
 require 'maze'
 require 'eatable'
-require 'video'
+require 'sound_and_video'
 require 'characters'
 
 Key = Struct.new("Key",:left,:right,:up,:down)
@@ -13,6 +13,10 @@ class Game
         @level = 1
         @key = Key.new
         @players = []
+        @theme = SDL::Mixer::Wave.load("../sounds/theme.wav")
+        @death = SDL::Mixer::Wave.load("../sounds/death.wav")
+        @new_level = SDL::Mixer::Wave.load("../sounds/newlevel.wav")
+        @chomp_a_ghost = SDL::Mixer::Wave.load("../sounds/chompaghost.wav")
         case mode
             when :single_player
                 @pacman = Character::PacMan.new(:pacman)
@@ -35,6 +39,16 @@ class Game
         Video::Game_screen.flip
     end
     def judge
+        if @maze.all_dots_eaten?
+            @players.each { |player| player.set_defaults }
+            @ghosts.each { |ghost| ghost.set_defaults }
+            @maze.set_defaults
+            self.draw
+            SDL::Mixer.play_channel(Sound::Background_channel,
+                                    @new_level,0)
+            sleep 1
+            return
+        end
         for ghost in @ghosts
             for player in @players
                 player.check_power_time
@@ -42,8 +56,14 @@ class Game
                     case ghost.state
                         when :weak 
                             ghost.state = :dead
+                            SDL::Mixer.play_channel(Sound::Pacman_channel,
+                                                    @chomp_a_ghost,0)
+                            sleep 0.5
                         when :flashing then
                             ghost.state = :dead
+                            SDL::Mixer.play_channel(Sound::Pacman_channel,
+                                                    @chomp_a_ghost,0)
+                            sleep 0.5
                         when :alive then
                             self.new_round 
                         else next
@@ -61,6 +81,7 @@ class Game
         for name in @players
             name.change_state_to(:dead)
             name.subtract_life
+            SDL::Mixer.play_channel(Sound::Background_channel,@death,0)
             self.death_animation
             name.set_defaults
         end
@@ -79,6 +100,7 @@ class Game
     def run
         direction = :left
         @maze.draw
+        SDL::Mixer.play_channel(Sound::Background_channel,@theme,0)
         while @pacman.alive?
             self.draw 
             @pacman.move(direction,@maze,@ghosts)
