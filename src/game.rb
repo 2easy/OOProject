@@ -37,9 +37,12 @@ class Game
     def judge
         for ghost in @ghosts
             for player in @players
+                player.check_power_time
                 if self.collide?(ghost,player)
                     case ghost.state
-                        when (:weak or :flashing) then
+                        when :weak 
+                            ghost.state = :dead
+                        when :flashing then
                             ghost.state = :dead
                         when :alive then
                             self.new_round 
@@ -56,10 +59,10 @@ class Game
     end
     def new_round
         for name in @players
-            name.state = :dead
+            name.change_state_to(:dead)
+            name.subtract_life
             self.death_animation
             name.set_defaults
-            name.lifes -= 1
         end
         for name in @ghosts
             name.set_defaults
@@ -77,12 +80,10 @@ class Game
         direction = :left
         @maze.draw
         while @pacman.alive?
-#            sleep 1
-            #@pacman.speed -= 1 if @pacman.eating?
             self.draw 
-
-            @pacman.move(direction,@maze)
+            @pacman.move(direction,@maze,@ghosts)
             for name in @ghosts
+                name.recover(@maze,@pacman)
                 name.move(@maze,@pacman)
             end
             self.judge
