@@ -202,7 +202,6 @@ module Character
             if self.fits_the_grid?
                 # Get direction
                 if self.alive?
-                # TODO change name
                     self.get_direction_to(maze,pacman.x,pacman.y)
                 elsif self.weak? or self.flashing?
                 # TODO running away from pacman
@@ -227,6 +226,10 @@ module Character
         end
         end
         def get_direction_to maze,x1,y1
+            if(self.alive? and self.in_cage?(maze))
+                self.get_direction_out_of_cage(maze)
+                return
+            end
             if @name == :blinky
                 if (self.x < x1 and 
                     maze[self.x+1,self.y] != :wall and 
@@ -252,18 +255,6 @@ module Character
             end
         end
         def allot_direction maze
-            if self.in_cage?(maze)
-                if maze[self.x,self.y-1] != :wall
-                    @direction = :up
-                    return
-                elsif maze[self.x-1,self.y] != :wall
-                    @direction = :left
-                    return
-                else
-                    @direction = :right
-                    return
-                end
-            end
             directions = Array.new(4)
             directions.fill(@direction)
             i = -1
@@ -276,6 +267,15 @@ module Character
             directions[i+=1] = :down  if(maze[self.x,self.y+1] != :wall and
                                          @direction  != :up)
             @direction = directions[rand(i+=1)]
+        end
+        def get_direction_out_of_cage maze
+            if maze[self.x,self.y-1] != :wall
+                @direction = :up
+            elsif maze[self.x-1,self.y] != :wall
+                @direction = :left
+            else
+                @direction = :right
+            end
         end
 
         def alive?;     @state == :alive;    end
