@@ -55,9 +55,6 @@ module Character
         def initialize name
             super name
             @lifes = 2
-            @power_time = 0
-            @killmode = SDL::Mixer::Wave.load("../sounds/killmode.wav")
-            @chomp_a_dot = SDL::Mixer::Wave.load("../sounds/chompadot.wav")
             self.set_defaults
         end
 
@@ -78,7 +75,12 @@ module Character
         def subtract_life; @lifes -= 1;            end
         def change_state_to state; @state = state; end
 
-        def move direction,maze,ghosts
+        def recover a,b
+            true
+        end
+
+        def move direction,maze,characters
+        ghosts = characters.filter { |name| name.instance_of?(Ghost) }
         self.speed.times do
             # Turning backwards
             @direction = direction if self.opposite_direction?(direction)
@@ -91,16 +93,14 @@ module Character
                 end
                 # Maze interaction
                 if maze.dot?(self.x,self.y)
-                    # TODO Score += 10
+                    $SCORE += 10
                     maze.remove_dot(self.x,self.y)
-                    SDL::Mixer.play_channel(Sound::Pacman_channel,
-                                            @chomp_a_dot,0)
-                    #@state = :eating
+                    Sound::Play::chomp_a_dot
                 elsif maze.power_pill?(self.x,self.y)
+                    $SCORE += 50
                     maze[self.x,self.y] = :empty
                     ghosts.each { |ghost| ghost.weaken }
-                    SDL::Mixer.play_channel(Sound::Background_channel,
-                                            @killmode,3)
+                    Sound::Play::killmode
                     @powered_at = SDL::get_ticks
                 end
                 x1,y1 = self.new_coords(@direction)
@@ -189,7 +189,8 @@ module Character
         end
         # TODO it's NOT working properly!
         def weaken; @state = :weak if not(self.dead?); end
-        def recover maze,pacman
+        def recover maze,players
+            pacman = players.first
             now = SDL::get_ticks
             if (self.dead? and self.in_cage?(maze))
                 @state = :alive
@@ -203,7 +204,9 @@ module Character
                 end
             end
         end
-        def move maze,pacman
+        def move direction,maze,characters
+        players = characters.filter { |name| name.instance_of?(PacMan) }
+        pacman = players.first
         @speed.times do
             if self.fits_the_grid?
                 # Get direction
