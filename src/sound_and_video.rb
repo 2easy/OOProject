@@ -6,8 +6,11 @@ module Video
     Bits_per_pixel = 32
     Image_width    = 25
     Image_height   = 25
+    Option_width   = 200
+    Option_height  = 50
     Init_animation = -1
     White_color    = [255,255,255]
+    Black_color    = [0,0,0]
 
     begin
         SDL.init(SDL::INIT_VIDEO)

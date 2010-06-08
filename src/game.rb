@@ -8,7 +8,7 @@ require 'system'
 require 'eatable'
 require 'characters'
 require 'sound_and_video'
-Key = Struct.new("Key",:left,:right,:up,:down)
+Key = Struct.new("Key",:left,:right,:up,:down,:space)
 
 class Game
     def initialize mode
@@ -47,6 +47,27 @@ class Game
                                       *Video::White_color)
         Video::Game_screen.flip
     end
+    def detect_key_press
+        if @event.poll != 0 then
+                if @event.type == SDL::Event::QUIT then
+                    exit
+                end
+                if @event.type == SDL::Event::KEYDOWN then
+                    return :end if @event.keySym == SDL::Key::ESCAPE
+                end
+            end
+            SDL::Key::scan
+            @key.left  = SDL::Key::press?(SDL::Key::LEFT )
+            @key.right = SDL::Key::press?(SDL::Key::RIGHT)
+            @key.up    = SDL::Key::press?(SDL::Key::UP   )
+            @key.down  = SDL::Key::press?(SDL::Key::DOWN )
+  
+            if    @key.left  then return :left
+            elsif @key.right then return :right
+            elsif @key.up    then return :up
+            elsif @key.down  then return :down
+            else return :none end
+    end
     def run
         direction = :left
         $SCORE = 0
@@ -66,29 +87,11 @@ class Game
 
             @judge.check_all
 
-            if @event.poll != 0 then
-                if @event.type == SDL::Event::QUIT then
-                    break
-                end
-                if @event.type == SDL::Event::KEYDOWN then
-                    exit if @event.keySym == SDL::Key::ESCAPE
-                end
-            end
-            SDL::Key::scan
-            @key.left  = SDL::Key::press?(SDL::Key::LEFT )
-            @key.right = SDL::Key::press?(SDL::Key::RIGHT)
-            @key.up    = SDL::Key::press?(SDL::Key::UP   )
-            @key.down  = SDL::Key::press?(SDL::Key::DOWN )
-  
-            if    @key.left  then direction = :left
-            elsif @key.right then direction = :right
-            elsif @key.up    then direction = :up
-            elsif @key.down  then direction = :down
-            else direction = :none end
+            direction = self.detect_key_press
+            break if direction == :end
         end
-        SDL.quit
     end
 end
 
-game = Game.new(:single_player)
-game.run
+menu = Menu.new
+menu.start
