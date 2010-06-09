@@ -1,7 +1,12 @@
 module HUD
     def HUD::draw
+        Video::Game_screen.fill_rect(30*Video::Image_width,
+                                     1*Video::Image_height,
+                                     4*Video::Image_width,
+                                     6*Video::Image_height,
+                                     Video::Black_color)    
         Font::HUD_font.draw_solid_utf8(Video::Game_screen,
-                                       "Score:#{$SCORE}",
+                                       "Score:",
                                        30*Video::Image_width,
                                        1*Video::Image_height,
                                        *Video::White_color)

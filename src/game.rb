@@ -8,7 +8,7 @@ require 'system'
 require 'eatable'
 require 'characters'
 require 'sound_and_video'
-Key = Struct.new("Key",:left,:right,:up,:down,:space)
+Key = Struct.new("Key",:left,:right,:up,:down,:space,:enter)
 
 class Game
     def initialize mode
@@ -49,24 +49,22 @@ class Game
     end
     def detect_key_press
         if @event.poll != 0 then
-                if @event.type == SDL::Event::QUIT then
-                    exit
-                end
-                if @event.type == SDL::Event::KEYDOWN then
-                    return :end if @event.keySym == SDL::Key::ESCAPE
-                end
+            exit if @event.type == SDL::Event::QUIT
+            if @event.type == SDL::Event::KEYDOWN then
+                return :end if @event.keySym == SDL::Key::ESCAPE
             end
-            SDL::Key::scan
-            @key.left  = SDL::Key::press?(SDL::Key::LEFT )
-            @key.right = SDL::Key::press?(SDL::Key::RIGHT)
-            @key.up    = SDL::Key::press?(SDL::Key::UP   )
-            @key.down  = SDL::Key::press?(SDL::Key::DOWN )
+        end
+        SDL::Key::scan
+        @key.left  = SDL::Key::press?(SDL::Key::LEFT )
+        @key.right = SDL::Key::press?(SDL::Key::RIGHT)
+        @key.up    = SDL::Key::press?(SDL::Key::UP   )
+        @key.down  = SDL::Key::press?(SDL::Key::DOWN )
   
-            if    @key.left  then return :left
-            elsif @key.right then return :right
-            elsif @key.up    then return :up
-            elsif @key.down  then return :down
-            else return :none end
+        if    @key.left  then return :left
+        elsif @key.right then return :right
+        elsif @key.up    then return :up
+        elsif @key.down  then return :down
+        else return :none end
     end
     def run
         direction = :left
