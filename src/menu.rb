@@ -14,16 +14,16 @@ class Menu
         @key    = Key.new
         @option = Single_player
         @last_option = Single_player
-        single_player_pic = Video::load_bmp("../images/single_player.bmp" )
-        two_player_pic    = Video::load_bmp("../images/two_players.bmp" )
-        high_scores_pic   = Video::load_bmp("../images/high_scores.bmp" )
-        controls_pic      = Video::load_bmp("../images/controls.bmp" )
-        credits_pic       = Video::load_bmp("../images/credits.bmp" )
-        quit_pic          = Video::load_bmp("../images/quit.bmp" )
+        @single_player_pic = Video::load_bmp("../images/single_player.bmp" )
+        @two_player_pic    = Video::load_bmp("../images/two_players.bmp" )
+        @high_scores_pic   = Video::load_bmp("../images/high_scores.bmp" )
+        @controls_pic      = Video::load_bmp("../images/controls.bmp" )
+        @credits_pic       = Video::load_bmp("../images/credits.bmp" )
+        @quit_pic          = Video::load_bmp("../images/quit.bmp" )
         @quiting_pic      = Video::load_bmp("../images/quiting.bmp" )
         @back_pic         = Video::load_bmp("../images/back.bmp" )
-        @option_pics = [single_player_pic, two_player_pic, high_scores_pic,
-                        controls_pic, credits_pic, quit_pic]
+        @option_pics = [@single_player_pic, @two_player_pic, @high_scores_pic,
+                        @controls_pic, @credits_pic, @quit_pic]
     end
 
     def start
@@ -64,6 +64,9 @@ class Menu
                 #here run two players
             when High_scores then
                 #here show hiscores
+                self.draw_high_scores
+                event = SDL::Event.new
+                self.wait
             when Controls    then
                 #here show controls
             when Credits     then
@@ -74,6 +77,21 @@ class Menu
                 exit
         end
     end
+    def wait
+        sleep 0.5
+        event = SDL::Event.new
+        key = Key.new
+        begin
+            begin
+                event.poll
+                pressed = event.key_press?
+            rescue
+                next
+            end
+        end while not(pressed)
+        sleep 0.5
+    end
+
     def draw_entry_menu
         Video::Game_screen.fill_rect(0,0,875,750,Video::Black_color)    
         dest_y = 300 
@@ -87,6 +105,15 @@ class Menu
                 Video::Game_screen,335,dest_y)
             dest_y += 50
         end
+        Video::Game_screen.flip
+    end
+    def draw_high_scores
+        Video::Game_screen.fill_rect(0,0,875,750,Video::Black_color)    
+        SDL::Screen.blit(
+            @high_scores_pic,
+            0,50,
+            Video::Option_width, Video::Option_height,
+            Video::Game_screen,335,150)
         Video::Game_screen.flip
     end
     def draw_quiting
