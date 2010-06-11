@@ -20,13 +20,14 @@ class Menu
         @controls_pic      = Video::load_bmp("../images/controls.bmp" )
         @credits_pic       = Video::load_bmp("../images/credits.bmp" )
         @quit_pic          = Video::load_bmp("../images/quit.bmp" )
-        @quiting_pic      = Video::load_bmp("../images/quiting.bmp" )
-        @back_pic         = Video::load_bmp("../images/back.bmp" )
+        @quiting_pic       = Video::load_bmp("../images/quiting.bmp" )
+        @back_pic          = Video::load_bmp("../images/back.bmp" )
         @option_pics = [@single_player_pic, @two_player_pic, @high_scores_pic,
                         @controls_pic, @credits_pic, @quit_pic]
     end
 
     def start
+        stop = true
         while true
             self.draw_entry_menu
             if @event.poll != 0 then
@@ -36,6 +37,9 @@ class Menu
                 if @event.type == SDL::Event::KEYDOWN then
                     @option = Quit if @event.keySym == SDL::Key::ESCAPE
                 end
+                if @event.type == SDL::Event::KEYUP then
+                    stop = false
+                end
             end
             SDL::Key::scan
             @key.up    = SDL::Key::press?(SDL::Key::UP   )
@@ -43,12 +47,14 @@ class Menu
             @key.space = SDL::Key::press?(SDL::Key::SPACE)
             @key.enter = SDL::Key::press?(SDL::Key::RETURN)
     
-            if    @key.up    then self.prev
-            elsif @key.down  then self.next
-            elsif @key.space then self.enter
-            elsif @key.enter then self.enter
+            if stop then next
+            else
+                if    @key.up    then stop = true; self.prev
+                elsif @key.down  then stop = true; self.next
+                elsif @key.space then stop = false; self.enter
+                elsif @key.enter then stop = false; self.enter
+                end
             end
-            sleep 0.1
         end
     end
        
@@ -93,7 +99,7 @@ class Menu
     end
 
     def draw_entry_menu
-        Video::Game_screen.fill_rect(0,0,875,750,Video::Black_color)    
+        Video::Game_screen.fill_rect(0,0,875,775,Video::Black_color)    
         dest_y = 300 
         @option_pics.each_with_index do |option,i| 
             if i == @option then pict_y = 50

@@ -16,7 +16,9 @@ module Video
         SDL.init(SDL::INIT_VIDEO)
         Game_screen = SDL::Screen.open(
             Screen_width, Screen_height, Bits_per_pixel,
-            SDL::SWSURFACE|SDL::DOUBLEBUF)#|SDL::FULLSCREEN)
+            SDL::SWSURFACE|SDL::DOUBLEBUF)
+#            SDL::SWSURFACE|SDL::DOUBLEBUF|SDL::FULLSCREEN)
+        SDL::Mouse.hide
     rescue Exception => a 
         puts "Failed to initialize video. Error message: #{a}"
         SDL.quit
@@ -43,10 +45,10 @@ module Sound
     end 
     Background_channel = 0
     Pacman_channel = 1
-    Theme_length   = 4.5
-    New_level_lenght = 1.0
+    Theme_length         = 4.5
+    New_level_lenght     = 1.0
     Chomp_a_ghost_length = 0.5
-    Death_length = 1.5
+    Death_length         = 1.5
     begin
         Theme         = SDL::Mixer::Wave.load("../sounds/theme.wav")
         New_level     = SDL::Mixer::Wave.load("../sounds/newlevel.wav")
