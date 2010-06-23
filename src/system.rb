@@ -1,6 +1,28 @@
 require 'sound'
 
 module System
+  Key   = Struct.new("Key",:left,:right,:up,:down,:space,:enter)
+  EVENT = SDL::Event.new
+  def System::detect_key_press controls
+    key = Key.new
+    left,right,up,down = controls
+    if (EVENT.poll != 0 and EVENT.type == SDL::Event::QUIT) then
+      exit 
+    else
+      SDL::Key::scan
+      key.left  = SDL::Key::press?(left )
+      key.right = SDL::Key::press?(right)
+      key.up    = SDL::Key::press?(up   )
+      key.down  = SDL::Key::press?(down )
+  
+      if    key.left  then return :left
+      elsif key.right then return :right
+      elsif key.up    then return :up
+      elsif key.down  then return :down
+      else return :none end
+    end
+  end
+
   class Judge
     def initialize game,maze,players,ghosts
       @game  = game

@@ -9,12 +9,11 @@ require 'video'
 require 'system'
 require 'eatable'
 require 'characters'
-Key = Struct.new("Key",:left,:right,:up,:down,:space,:enter)
 
 class Game
+  Controls = [[SDL::Key::LEFT,SDL::Key::RIGHT,SDL::Key::UP,SDL::Key::DOWN],
+              [SDL::Key::A,SDL::Key::D,SDL::Key::W,SDL::Key::S]]
   def initialize mode
-    @event    = SDL::Event.new
-    @key    = Key.new
     @level    = 1
     @characters = []
     @players  = []
@@ -26,10 +25,10 @@ class Game
     end
     case mode
       when :single_player
-        @players = [Character::PacMan.new(:pacman)]
+        @players << Character::PacMan.new(:pacman,Controls.shift)
       when :two_players
         2.times do
-          @players << Character::PacMan.new(:pacman)
+          @players << Character::PacMan.new(:pacman,Controls.shift)
         end
     end
     @characters = @players + @ghosts 
@@ -51,27 +50,8 @@ class Game
                                   *Video::White_color)
     Video::Game_screen.flip
   end
-  def detect_key_press
-    if @event.poll != 0 then
-      exit if @event.type == SDL::Event::QUIT
-      if @event.type == SDL::Event::KEYDOWN then
-        return :end if @event.keySym == SDL::Key::ESCAPE
-      end
-    end
-    SDL::Key::scan
-    @key.left  = SDL::Key::press?(SDL::Key::LEFT )
-    @key.right = SDL::Key::press?(SDL::Key::RIGHT)
-    @key.up  = SDL::Key::press?(SDL::Key::UP   )
-    @key.down  = SDL::Key::press?(SDL::Key::DOWN )
   
-    if  @key.left  then return :left
-    elsif @key.right then return :right
-    elsif @key.up  then return :up
-    elsif @key.down  then return :down
-    else return :none end
-  end
   def run
-    direction = :left
     $SCORE = 0
     $LEVEL = 1
     $LIFES = 3
@@ -79,19 +59,18 @@ class Game
     self.draw 
     self.draw_get_ready
     Sound::Play::theme
-    sleep Sound::Theme_length
+    #sleep Sound::Theme_length
     while(@players.each { |player| player.alive? })
       self.draw 
       
       @characters.each do |character|
         character.recover(@maze,@players)
-        character.move(direction,@maze,@characters)
+        character.move(@maze,@characters)
       end
 
       @judge.check_all
-
-      direction = self.detect_key_press
-      break if direction == :end
+      # TODO breaking loop on Esc
+      #break if direction == :end
     end
   end
 end

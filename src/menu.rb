@@ -11,7 +11,7 @@ class Menu
   Options = [Single_player,Two_players,High_scores,Controls,Credits,Quit]
   def initialize
     @event  = SDL::Event.new
-    @key    = Key.new
+    @key    = System::Key.new
     @option = Single_player
     @last_option = Single_player
     @single_player_pic = Video::load_bmp("../images/single_player.bmp" )
@@ -70,6 +70,8 @@ class Menu
         game = Game.new(:single_player)
         game.run
       when Two_players then
+        game = Game.new(:two_players)
+        game.run
         #here run two players
       when High_scores then
         #here show hiscores

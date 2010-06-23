@@ -53,9 +53,10 @@ module Character
     attr_reader :speed, :powered_at, :lifes
     Pacman_speed           = 3
     Pacman_animation_speed = 3
-    def initialize name
+    def initialize name,controls
       super name
       @lifes = 2
+      @left,@right,@up,@down = controls 
       self.set_defaults
     end
 
@@ -79,44 +80,44 @@ module Character
     def recover a,b
       true
     end
-
-    def move direction,maze,characters
-    ghosts = characters.find_all { |name| name.instance_of?(Ghost) }
-    self.speed.times do
-      # Turning backwards
-      @direction = direction if self.opposite_direction?(direction)
-      # Changing direction
-      if self.fits_the_grid?
-        x1,y1 = self.new_coords(direction)
-        unless direction == :none
-          @direction = direction unless(maze.wall?(x1,y1) or 
-                          maze.cage?(x1,y1))
-        end
-        # Maze interaction
-        if maze.dot?(self.x,self.y)
-          $SCORE += 10
-          maze.remove_dot(self.x,self.y)
-          Sound::Play::chomp_a_dot
-        elsif maze.power_pill?(self.x,self.y)
-          $SCORE += 50
-          maze[self.x,self.y] = :empty
-          ghosts.each { |ghost| ghost.weaken }
-          Sound::Play::killmode
-          @powered_at = SDL::get_ticks
-        end
-        x1,y1 = self.new_coords(@direction)
-        if maze.teleport?(x1,y1)
-          if x1 == 29
-            @sprite_coords[:x] = Video::Image_width * 1
-          else
-            @sprite_coords[:x] = Video::Image_width * 28
+        def move maze,characters
+      direction = System::detect_key_press [@left,@right,@up,@down]
+      ghosts = characters.find_all { |name| name.instance_of?(Ghost) }
+      self.speed.times do
+        # Turning backwards
+        @direction = direction if self.opposite_direction?(direction)
+        # Changing direction
+        if self.fits_the_grid?
+          x1,y1 = self.new_coords(direction)
+          unless direction == :none
+            @direction = direction unless(maze.wall?(x1,y1) or 
+                                          maze.cage?(x1,y1))
           end
-        elsif (maze.wall?(x1,y1) or maze.cage?(x1,y1))
-          return
-        end 
+          # Maze interaction
+          if maze.dot?(self.x,self.y)
+            $SCORE += 10
+            maze.remove_dot(self.x,self.y)
+            Sound::Play::chomp_a_dot
+          elsif maze.power_pill?(self.x,self.y)
+            $SCORE += 50
+            maze[self.x,self.y] = :empty
+            ghosts.each { |ghost| ghost.weaken }
+            Sound::Play::killmode
+            @powered_at = SDL::get_ticks
+          end
+          x1,y1 = self.new_coords(@direction)
+          if maze.teleport?(x1,y1)
+            if x1 == 29
+              @sprite_coords[:x] = Video::Image_width * 1
+            else
+              @sprite_coords[:x] = Video::Image_width * 28
+            end
+          elsif (maze.wall?(x1,y1) or maze.cage?(x1,y1))
+            return
+          end 
+        end
+        self.move_sprite
       end
-      self.move_sprite
-    end
     end
     def check_power_time
       now = SDL::get_ticks
@@ -205,7 +206,7 @@ module Character
         end
       end
     end
-    def move direction,maze,characters
+    def move maze,characters
     players = characters.find_all { |name| name.instance_of?(PacMan) }
     pacman = players.first
     @speed.times do
