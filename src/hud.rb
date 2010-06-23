@@ -13,10 +13,14 @@ module HUD
     Video::Game_screen.flip
   end
   def HUD::draw_lifes
-    SDL::Screen.blit(
-      HUD::Life_pic, 100, 0,
-      Video::Image_width, Video::Image_height,
-      Video::Game_screen,750,100)
+    x = 0
+    $LIFES.times do
+      SDL::Screen.blit(
+        HUD::Life_pic, 100, 0,
+        Video::Image_width, Video::Image_height,
+        Video::Game_screen,750+x,100)
+      x += 25
+    end
   end
   def HUD::blacken_rect x,y,width,height
     Video::Game_screen.fill_rect(x*Video::Image_width,

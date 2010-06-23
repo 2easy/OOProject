@@ -16,20 +16,23 @@ class Game
     @event    = SDL::Event.new
     @key    = Key.new
     @level    = 1
+    @characters = []
     @players  = []
     @ghosts   = []
-    @characters = []
+    @maze = Maze.new
+    @eatable = ToEat::Eatable.new
+    for name in Character::Ghosts
+      @ghosts << Character::Ghost.new(name)
+    end
     case mode
       when :single_player
         @players = [Character::PacMan.new(:pacman)]
-        for name in Character::Ghosts
-          @ghosts << Character::Ghost.new(name)
+      when :two_players
+        2.times do
+          @players << Character::PacMan.new(:pacman)
         end
-        @characters = @players + @ghosts 
-
-        @maze = Maze.new
-        @eatable = ToEat::Eatable.new
     end
+    @characters = @players + @ghosts 
     @judge = System::Judge.new(self,@maze,@players,@ghosts)
   end
   def draw
@@ -71,6 +74,7 @@ class Game
     direction = :left
     $SCORE = 0
     $LEVEL = 1
+    $LIFES = 3
     @maze.draw
     self.draw 
     self.draw_get_ready

@@ -12,6 +12,9 @@ module System
       self.check_dots
       self.check_collision
     end
+    def update_lifes
+      $LIFES = @players.shift.lifes 
+    end
     def check_dots
       if @maze.all_dots_eaten?
         $LEVEL += 1
