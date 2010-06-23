@@ -81,7 +81,7 @@ module Character
     end
 
     def move direction,maze,characters
-    ghosts = characters.filter { |name| name.instance_of?(Ghost) }
+    ghosts = characters.find_all { |name| name.instance_of?(Ghost) }
     self.speed.times do
       # Turning backwards
       @direction = direction if self.opposite_direction?(direction)
@@ -206,7 +206,7 @@ module Character
       end
     end
     def move direction,maze,characters
-    players = characters.filter { |name| name.instance_of?(PacMan) }
+    players = characters.find_all { |name| name.instance_of?(PacMan) }
     pacman = players.first
     @speed.times do
       if self.fits_the_grid?

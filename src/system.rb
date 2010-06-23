@@ -1,15 +1,5 @@
 require 'sound'
 
-class Array
-  def filter
-    tmp = []
-    self.each do |elem|
-      tmp << elem if yield(elem)
-    end
-    tmp
-  end
-end
-
 module System
   class Judge
     def initialize game,maze,players,ghosts
@@ -40,7 +30,7 @@ module System
           player.check_power_time
           if self.collide?(ghost,player)
             case ghost.state
-              when :weak 
+              when :weak then
                 $SCORE += 200
                 ghost.state = :dead
                 Sound::Play::chomp_a_ghost
