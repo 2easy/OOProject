@@ -50,7 +50,7 @@ module Character
   end
   
   class PacMan < Creature
-    attr_reader :speed, :powered_at, :lifes
+    attr_reader :speed, :powered_at, :lifesi, :state
     Pacman_speed           = 3
     Pacman_animation_speed = 3
     def initialize name,controls

@@ -66,6 +66,7 @@ module System
                 Sound::Play::chomp_a_ghost
                 sleep Sound::Chomp_a_ghost_length
               when :alive then
+                player.change_state_to(:dead)
                 self.new_round 
               else next
             end
@@ -80,10 +81,11 @@ module System
     end
     def new_round
       @players.each { |player|
-        player.change_state_to(:dead)
-        player.subtract_life
-        Sound::Play::pacman_death
-        self.death_animation
+        if player.state == :dead
+          player.subtract_life
+          Sound::Play::pacman_death
+          self.death_animation
+        end
         player.set_defaults
       }
       @ghosts.each { |ghost|
